@@ -1,0 +1,11 @@
+assets/uploads/payment_proofs/*
+assets/uploads/gcash_proofs/*
+assets/uploads/gotyme_proofs/*
+assets/uploads/ratings/*
+!assets/uploads/payment_proofs/.gitkeep
+!assets/uploads/gcash_proofs/.gitkeep
+!assets/uploads/gotyme_proofs/.gitkeep
+!assets/uploads/ratings/.gitkeep
+
+.DS_Store
+Thumbs.db
