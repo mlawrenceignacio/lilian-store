@@ -1,0 +1,33 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Force trailing slash handling to stay simple
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ $1 [L]
+</IfModule>
+
+# Basic security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "^(database\.php|functions\.php|session\.php|\.env|composer\.(json|lock))$">
+    Require all denied
+</FilesMatch>
+
+# Block direct access to include/config folders where possible
+RewriteRule ^config/ - [F,L]
+RewriteRule ^includes/ - [F,L]
+
+# Restrict script execution inside uploads
+RewriteRule ^assets/uploads/.*\.(php|php5|phtml|phar)$ - [F,L,NC]
+
+# Better default charset
+AddDefaultCharset UTF-8
