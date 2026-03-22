@@ -121,7 +121,7 @@ include __DIR__ . "/../includes/header.php";
                     <div class="admin-main-head">
                         <div>
                             <h1>Admin Accounts</h1>
-                            <p>View all admin accounts registered in the system.</p>
+                            <p>View existing administrators and register new admin accounts securely from inside the system.</p>
                         </div>
                         <div class="admin-date-chip"><?= count($admins) ?> admin<?= count($admins) !== 1 ? 's' : '' ?></div>
                     </div>
@@ -158,8 +158,110 @@ include __DIR__ . "/../includes/header.php";
                 <section class="admin-main-card">
                     <div class="admin-card-head">
                         <div>
+                            <h2>Register New Admin</h2>
+                            <p>Create a new administrator account from inside the admin panel.</p>
+                        </div>
+                    </div>
+
+                    <form action="/lilian-online-store/actions/register-admin.php" method="POST" class="admin-form-grid">
+                        <div>
+                            <label for="full_name">Full Name</label>
+                            <input
+                                type="text"
+                                id="full_name"
+                                name="full_name"
+                                class="form-input"
+                                required
+                                value="<?= htmlspecialchars($_SESSION['form_old']['full_name'] ?? '') ?>"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="username">Admin Username</label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                class="form-input"
+                                required
+                                value="<?= htmlspecialchars($_SESSION['form_old']['username'] ?? '') ?>"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="email">Email Address</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-input"
+                                required
+                                value="<?= htmlspecialchars($_SESSION['form_old']['email'] ?? '') ?>"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="phone">Contact Number</label>
+                            <input
+                                type="text"
+                                id="phone"
+                                name="phone"
+                                class="form-input"
+                                value="<?= htmlspecialchars($_SESSION['form_old']['phone'] ?? '') ?>"
+                            >
+                        </div>
+
+                        <div class="full-span">
+                            <label for="address">Address</label>
+                            <textarea
+                                id="address"
+                                name="address"
+                                class="form-textarea"
+                            ><?= htmlspecialchars($_SESSION['form_old']['address'] ?? '') ?></textarea>
+                        </div>
+
+                        <div>
+                            <label for="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="form-input"
+                                required
+                                minlength="8"
+                                placeholder="Enter temporary password"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="confirm_password">Confirm Password</label>
+                            <input
+                                type="password"
+                                id="confirm_password"
+                                name="confirm_password"
+                                class="form-input"
+                                required
+                                minlength="8"
+                                placeholder="Repeat password"
+                            >
+                        </div>
+
+                        <div class="full-span admin-panel-note">
+                            New admins are created only from the admin side. Make sure the email and username are unique.
+                        </div>
+
+                        <div class="full-span">
+                            <button type="submit" class="btn btn-primary">Register Admin</button>
+                        </div>
+                    </form>
+                    <?php unset($_SESSION['form_old']); ?>
+                </section>
+
+                <section class="admin-main-card">
+                    <div class="admin-card-head">
+                        <div>
                             <h2>Accounts List</h2>
-                            <p>This page is view-only, as required for the admin accounts feature.</p>
+                            <p>Use this page to review existing administrators and create new admin accounts when needed.</p>
                         </div>
                     </div>
 
@@ -189,7 +291,7 @@ include __DIR__ . "/../includes/header.php";
                         </div>
                     <?php else: ?>
                         <div class="admin-empty">
-                            <h3>No admin accounts found</h3>
+                            <h3>No admin accounts match the current search. You can still register a new admin using the form above.</h3>
                             <p>
                                 No admin accounts match the current search. This page is for viewing
                                 all admin accounts only.

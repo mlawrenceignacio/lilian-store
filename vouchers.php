@@ -58,19 +58,14 @@ include __DIR__ . "/includes/header.php";
 
 <section class="vouchers-section">
     <div class="container">
-        <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success">
-                <?= htmlspecialchars($_SESSION['success_message']) ?>
-            </div>
-            <?php unset($_SESSION['success_message']); ?>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-error">
-                <?= htmlspecialchars($_SESSION['error_message']) ?>
-            </div>
-            <?php unset($_SESSION['error_message']); ?>
-        <?php endif; ?>
+        <?php
+renderFlashMessages([
+    'success_title' => 'Success',
+    'success_heading' => 'Action completed successfully',
+    'error_title' => 'Something went wrong',
+    'error_heading' => 'We couldn’t complete your request'
+]);
+?>
 
         <div class="vouchers-layout">
             <section class="vouchers-panel">

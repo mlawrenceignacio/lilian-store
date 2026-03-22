@@ -135,6 +135,62 @@ function uploadPaymentProof($file, $targetFolder) {
     return [true, $relativePath, null];
 }
 
+function getFlashMessage(?string $key): ?string
+{
+    if (!$key || !isset($_SESSION[$key])) {
+        return null;
+    }
+
+    $message = trim((string) $_SESSION[$key]);
+    unset($_SESSION[$key]);
+
+    return $message !== '' ? $message : null;
+}
+
+function renderFlashMessages(array $options = []): void
+{
+    $successTitle = $options['success_title'] ?? 'Success';
+    $successHeading = $options['success_heading'] ?? 'Action completed successfully';
+    $errorTitle = $options['error_title'] ?? 'Something went wrong';
+    $errorHeading = $options['error_heading'] ?? 'We couldn’t complete your request';
+    $wrapperClass = $options['wrapper_class'] ?? 'system-flash-stack';
+
+    $successMessage = getFlashMessage('success_message');
+    $errorMessage = getFlashMessage('error_message');
+
+    if (!$successMessage && !$errorMessage) {
+        return;
+    }
+
+    echo '<div class="' . htmlspecialchars($wrapperClass) . '">';
+
+    if ($successMessage) {
+        echo '
+        <div class="system-flash system-flash-success" role="alert" aria-live="polite">
+            <div class="system-flash-icon">✓</div>
+            <div class="system-flash-body">
+                <span class="system-flash-kicker">' . htmlspecialchars($successTitle) . '</span>
+                <h3>' . htmlspecialchars($successHeading) . '</h3>
+                <p>' . htmlspecialchars($successMessage) . '</p>
+            </div>
+        </div>';
+    }
+
+    if ($errorMessage) {
+        echo '
+        <div class="system-flash system-flash-error" role="alert" aria-live="assertive">
+            <div class="system-flash-icon">!</div>
+            <div class="system-flash-body">
+                <span class="system-flash-kicker">' . htmlspecialchars($errorTitle) . '</span>
+                <h3>' . htmlspecialchars($errorHeading) . '</h3>
+                <p>' . htmlspecialchars($errorMessage) . '</p>
+            </div>
+        </div>';
+    }
+
+    echo '</div>';
+}
+
 function updateProductAverageRating($conn, $productId) {
     $stmt = $conn->prepare("
         SELECT AVG(rating) AS avg_rating
@@ -188,5 +244,89 @@ function verifyCsrf() {
         header("Location: " . ($_SERVER['HTTP_REFERER'] ?? '/lilian-online-store/index.php'));
         exit;
     }
+}
+
+function getOrderRatingProgress(mysqli $conn, int $userId, int $orderId): array
+{
+    $stmt = $conn->prepare("
+        SELECT
+            oi.product_id,
+            CASE
+                WHEN r.id IS NULL THEN 0
+                ELSE 1
+            END AS is_rated
+        FROM order_items oi
+        LEFT JOIN ratings r
+            ON r.order_id = oi.order_id
+            AND r.product_id = oi.product_id
+            AND r.user_id = ?
+        WHERE oi.order_id = ?
+        GROUP BY oi.product_id, r.id
+    ");
+    $stmt->bind_param("ii", $userId, $orderId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $totalProducts = 0;
+    $ratedProducts = 0;
+
+    while ($row = $result->fetch_assoc()) {
+        $totalProducts++;
+        if ((int) $row['is_rated'] === 1) {
+            $ratedProducts++;
+        }
+    }
+
+    return [
+        'total_products' => $totalProducts,
+        'rated_products' => $ratedProducts,
+        'unrated_products' => max(0, $totalProducts - $ratedProducts),
+        'is_fully_rated' => $totalProducts > 0 && $ratedProducts === $totalProducts,
+        'has_unrated_products' => $totalProducts > 0 && $ratedProducts < $totalProducts,
+    ];
+}
+
+function isOrderFullyRated(mysqli $conn, int $userId, int $orderId): bool
+{
+    $progress = getOrderRatingProgress($conn, $userId, $orderId);
+    return $progress['is_fully_rated'];
+}
+
+function orderHasUnratedProducts(mysqli $conn, int $userId, int $orderId): bool
+{
+    $progress = getOrderRatingProgress($conn, $userId, $orderId);
+    return $progress['has_unrated_products'];
+}
+
+function getDeliveredOrdersGroupedByRatingStatus(mysqli $conn, int $userId): array
+{
+    $stmt = $conn->prepare("
+        SELECT id
+        FROM orders
+        WHERE user_id = ? AND status = 'delivered'
+        ORDER BY created_at DESC, id DESC
+    ");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $toRateIds = [];
+    $ratedIds = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $orderId = (int) $row['id'];
+        $progress = getOrderRatingProgress($conn, $userId, $orderId);
+
+        if ($progress['has_unrated_products']) {
+            $toRateIds[] = $orderId;
+        } elseif ($progress['is_fully_rated']) {
+            $ratedIds[] = $orderId;
+        }
+    }
+
+    return [
+        'to_rate_ids' => $toRateIds,
+        'rated_ids' => $ratedIds,
+    ];
 }
 ?>

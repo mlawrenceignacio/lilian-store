@@ -1,4 +1,3 @@
-/* layout */
 .admin-section {
   padding: 1rem 0 2.8rem;
 }
@@ -37,7 +36,8 @@
 
 .admin-main-card,
 .admin-graph-card,
-.admin-profile-panel {
+.admin-profile-panel,
+.admin-profile-card {
   padding: 1.1rem;
 }
 
@@ -49,8 +49,7 @@
 .admin-main-head,
 .admin-card-head,
 .admin-order-top,
-.admin-order-full-head,
-.admin-main-head {
+.admin-order-full-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -69,7 +68,23 @@
 }
 
 .admin-main-head p,
-.admin-card-head p {
+.admin-card-head p,
+.admin-stat-label,
+.admin-stat-note,
+.admin-order-meta,
+.admin-order-full-meta,
+.admin-order-product-meta,
+.admin-info-label,
+.admin-profile-info-label,
+.admin-panel-note,
+.admin-log-meta,
+.admin-log-time,
+.admin-account-meta,
+.admin-account-date,
+.admin-notif-meta,
+.admin-notif-time,
+.quick-link-desc,
+.admin-empty p {
   color: var(--text-muted);
 }
 
@@ -77,7 +92,6 @@
   font-size: 1.35rem;
 }
 
-/* sidebar */
 .admin-sidebar-top,
 .admin-profile-cover,
 .admin-account-avatar {
@@ -141,7 +155,6 @@
   color: var(--primary-dark);
 }
 
-/* feedback */
 .admin-feedback-banner {
   display: flex;
   align-items: flex-start;
@@ -249,7 +262,6 @@
   color: #9f2e2e;
 }
 
-/* hero */
 .admin-hero-card {
   overflow: hidden;
   background:
@@ -336,7 +348,6 @@
   border: 1px solid rgba(219, 231, 223, 0.9);
 }
 
-/* stats */
 .admin-stats-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -356,23 +367,6 @@
   inset: auto 0 0;
   height: 4px;
   background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-}
-
-.admin-stat-label,
-.admin-stat-note,
-.admin-order-meta,
-.admin-order-full-meta,
-.admin-order-product-meta,
-.admin-info-label,
-.admin-profile-info-label,
-.admin-panel-note,
-.admin-log-meta,
-.admin-log-time,
-.admin-account-meta,
-.admin-account-date,
-.admin-notif-meta,
-.admin-notif-time {
-  color: var(--text-muted);
 }
 
 .admin-stat-label,
@@ -403,7 +397,6 @@
   font-size: 0.9rem;
 }
 
-/* graph */
 .bar-graph {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -457,7 +450,6 @@
   color: var(--text-main);
 }
 
-/* common grids */
 .admin-two-col {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
@@ -472,7 +464,10 @@
 .admin-products-grid,
 .admin-accounts-grid,
 .admin-log-list,
-.admin-toolbar {
+.admin-toolbar,
+.admin-profile-info,
+.admin-order-full-body,
+.admin-inline-form {
   display: grid;
   gap: 1rem;
 }
@@ -498,13 +493,17 @@
 .admin-account-title,
 .admin-profile-name,
 .admin-info-value,
-.admin-profile-info-value {
+.admin-profile-info-value,
+.admin-order-total,
+.admin-order-product-total,
+.admin-rating-readonly {
   font-weight: 800;
 }
 
 .admin-order-title,
 .admin-order-product-title,
-.admin-product-manage-title {
+.admin-product-manage-title,
+.quick-link-title {
   margin-bottom: 0.15rem;
 }
 
@@ -527,7 +526,6 @@
 
 .admin-order-total,
 .admin-order-product-total {
-  font-weight: 800;
   color: var(--primary-dark);
 }
 
@@ -535,11 +533,15 @@
   white-space: nowrap;
 }
 
-.admin-order-product-total {
+.admin-order-product-total,
+.admin-rating-readonly {
   text-align: right;
 }
 
-/* pills */
+.admin-rating-readonly {
+  color: #b07a00;
+}
+
 .admin-status-pill,
 .admin-notif-type,
 .admin-log-admin,
@@ -605,7 +607,6 @@
   margin-top: 0.35rem;
 }
 
-/* quick links */
 .quick-link-card {
   display: block;
   padding: 1rem;
@@ -620,16 +621,10 @@
   box-shadow: var(--shadow-soft);
 }
 
-.quick-link-title {
-  margin-bottom: 0.25rem;
-}
-
 .quick-link-desc {
-  color: var(--text-muted);
   font-size: 0.92rem;
 }
 
-/* empty */
 .admin-empty {
   padding: 2.3rem 1.2rem;
   text-align: center;
@@ -650,10 +645,8 @@
 .admin-empty p {
   max-width: 540px;
   margin: 0 auto;
-  color: var(--text-muted);
 }
 
-/* notifications */
 .admin-notif-card,
 .admin-log-card,
 .admin-account-card {
@@ -671,12 +664,56 @@
   border-radius: 22px;
 }
 
+.admin-log-card {
+  display: grid;
+  grid-template-columns: 76px 1fr auto;
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem;
+  border-radius: 22px;
+}
+
+.admin-account-card {
+  display: grid;
+  grid-template-columns: 84px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 24px;
+}
+
 .admin-notif-icon {
   width: 74px;
   height: 74px;
   border: 1px solid rgba(219, 231, 223, 0.9);
   border-radius: 22px;
   font-size: 1.5rem;
+}
+
+.admin-log-icon {
+  width: 76px;
+  height: 76px;
+  border: 1px solid rgba(219, 231, 223, 0.9);
+  border-radius: 22px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 1.5rem;
+}
+
+.admin-account-avatar {
+  width: 84px;
+  height: 84px;
+  border: 1px solid rgba(219, 231, 223, 0.9);
+  border-radius: 24px;
+  color: var(--primary-dark);
+  font-size: 1.8rem;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 255, 255, 0.2),
+      transparent 30%
+    ),
+    linear-gradient(135deg, #eef8f1, #ffffff);
 }
 
 .admin-notif-body,
@@ -718,11 +755,25 @@
   font-size: 0.9rem;
 }
 
-/* filters */
-.admin-filter-row {
+.admin-account-meta {
+  margin-bottom: 0.15rem;
+}
+
+.admin-account-side {
+  text-align: right;
+}
+
+.admin-filter-row,
+.admin-inline-row,
+.admin-product-form-actions,
+.admin-filter-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
+}
+
+.admin-inline-row {
+  align-items: center;
 }
 
 .admin-filter-chip {
@@ -741,13 +792,141 @@
   color: var(--primary-dark);
 }
 
-.admin-toolbar-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr 0.8fr;
-  gap: 0.9rem;
+.admin-filter-field {
+  display: flex;
+  flex-direction: column;
 }
 
-/* orders */
+.admin-toolbar {
+  overflow: visible;
+}
+
+.admin-toolbar-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(220px, 0.9fr) auto;
+  gap: 1rem;
+  align-items: end;
+  margin-top: 1rem;
+}
+
+.admin-toolbar-grid > div {
+  min-width: 0;
+}
+
+.admin-toolbar-grid label {
+  display: inline-block;
+  margin-bottom: 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #2e5b43;
+}
+
+.admin-main-card.admin-toolbar {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfb 100%);
+  border: 1px solid #e4efe7;
+  box-shadow: 0 16px 34px rgba(31, 53, 40, 0.06);
+}
+
+.admin-main-card.admin-toolbar .admin-card-head p {
+  max-width: 56ch;
+}
+
+.form-input,
+.filter-select,
+.admin-filter-input,
+.admin-filter-select,
+.form-textarea {
+  width: 100%;
+  border: 1px solid #d6e5da;
+  border-radius: 16px;
+  background: #fbfdfb;
+  font: inherit;
+}
+
+.form-input,
+.filter-select,
+.admin-filter-input,
+.admin-filter-select {
+  min-height: 50px;
+  padding: 0.85rem 1rem;
+  color: #1f3528;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  box-shadow: inset 0 1px 2px rgba(18, 52, 33, 0.03);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.form-textarea {
+  min-height: 120px;
+  padding: 0.9rem 1rem;
+  resize: vertical;
+}
+
+.form-input::placeholder,
+.admin-filter-input::placeholder {
+  color: #8ba091;
+}
+
+.form-input:hover,
+.filter-select:hover,
+.admin-filter-input:hover,
+.admin-filter-select:hover {
+  border-color: #bdd7c5;
+  background: #ffffff;
+}
+
+.form-input:focus,
+.filter-select:focus,
+.admin-filter-input:focus,
+.admin-filter-select:focus {
+  outline: none;
+  border-color: #4d9b6d;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(77, 155, 109, 0.14);
+}
+
+.filter-select,
+.admin-filter-select {
+  padding-right: 3rem;
+  cursor: pointer;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #4d7c5f 50%),
+    linear-gradient(135deg, #4d7c5f 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) calc(50% - 3px),
+    calc(100% - 16px) calc(50% - 3px);
+  background-size:
+    6px 6px,
+    6px 6px;
+  background-repeat: no-repeat;
+}
+
+.admin-inline-row .filter-select,
+.admin-inline-row .form-input {
+  min-width: 220px;
+}
+
+.admin-inline-row .btn {
+  min-height: 50px;
+  padding-inline: 1.15rem;
+  border-radius: 14px;
+}
+
+.admin-filter-actions {
+  align-items: stretch;
+}
+
+.admin-toolbar-grid .btn.btn-primary,
+.admin-toolbar-grid .btn.btn-secondary {
+  white-space: nowrap;
+}
+
 .admin-order-full-card,
 .admin-product-manage-card,
 .admin-add-product-card {
@@ -760,6 +939,17 @@
 .admin-order-full-card,
 .admin-product-manage-card {
   background: linear-gradient(180deg, #ffffff 0%, #f8fcf9 100%);
+}
+
+.admin-add-product-card {
+  padding: 1rem;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(47, 143, 91, 0.1),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
 }
 
 .admin-order-full-head,
@@ -776,11 +966,6 @@
 .admin-order-full-body,
 .admin-product-manage-body {
   padding: 1rem;
-}
-
-.admin-order-full-body {
-  display: grid;
-  gap: 1rem;
 }
 
 .admin-order-info-grid {
@@ -859,27 +1044,6 @@
   align-items: end;
 }
 
-.admin-inline-form {
-  display: grid;
-  gap: 0.7rem;
-}
-
-.admin-inline-row,
-.admin-product-form-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.admin-inline-row {
-  align-items: center;
-}
-
-.admin-inline-row .filter-select,
-.admin-inline-row .form-input {
-  min-width: 220px;
-}
-
 .admin-proof-link {
   color: var(--primary-dark);
   font-weight: 700;
@@ -894,7 +1058,6 @@
   font-size: 0.92rem;
 }
 
-/* profile */
 .admin-profile-grid {
   display: grid;
   grid-template-columns: 360px 1fr;
@@ -906,7 +1069,6 @@
   position: sticky;
   top: 102px;
   overflow: hidden;
-  padding: 1.1rem;
 }
 
 .admin-profile-cover {
@@ -928,11 +1090,6 @@
   color: var(--primary-dark);
 }
 
-.admin-profile-info {
-  display: grid;
-  gap: 0.85rem;
-}
-
 .admin-profile-info-box {
   background: linear-gradient(180deg, #ffffff 0%, #f8fcf9 100%);
 }
@@ -944,86 +1101,13 @@
 .admin-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1rem 1.1rem;
 }
 
 .admin-form-grid .full-span {
   grid-column: 1 / -1;
 }
 
-/* logs */
-.admin-log-card {
-  display: grid;
-  grid-template-columns: 76px 1fr auto;
-  gap: 1rem;
-  align-items: start;
-  padding: 1rem;
-  border-radius: 22px;
-}
-
-.admin-log-icon {
-  width: 76px;
-  height: 76px;
-  border: 1px solid rgba(219, 231, 223, 0.9);
-  border-radius: 22px;
-  background: var(--primary-soft);
-  color: var(--primary-dark);
-  font-size: 1.5rem;
-}
-
-/* products */
-.admin-rating-readonly {
-  text-align: right;
-  font-weight: 800;
-  color: #b07a00;
-}
-
-.admin-add-product-card {
-  padding: 1rem;
-  background:
-    radial-gradient(
-      circle at top left,
-      rgba(47, 143, 91, 0.1),
-      transparent 28%
-    ),
-    linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
-}
-
-/* accounts */
-.admin-account-card {
-  display: grid;
-  grid-template-columns: 84px 1fr auto;
-  gap: 1rem;
-  align-items: center;
-  padding: 1rem;
-  border-radius: 24px;
-}
-
-.admin-account-avatar {
-  width: 84px;
-  height: 84px;
-  border: 1px solid rgba(219, 231, 223, 0.9);
-  border-radius: 24px;
-  color: var(--primary-dark);
-  font-size: 1.8rem;
-  background:
-    radial-gradient(
-      circle at top left,
-      rgba(255, 255, 255, 0.2),
-      transparent 30%
-    ),
-    linear-gradient(135deg, #eef8f1, #ffffff);
-}
-
-.admin-account-meta {
-  margin-bottom: 0.15rem;
-}
-
-.admin-account-side {
-  text-align: right;
-}
-
-/* responsive */
 @media (max-width: 1200px) {
   .admin-stats-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1038,6 +1122,17 @@
   .admin-toolbar-grid,
   .admin-order-info-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .admin-toolbar-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-toolbar-grid .admin-inline-row,
+  .admin-toolbar-grid .admin-filter-actions {
+    grid-column: 1 / -1;
   }
 }
 
@@ -1118,9 +1213,28 @@
 }
 
 @media (max-width: 640px) {
+  .admin-toolbar-grid,
   .admin-stats-grid,
   .bar-graph {
     grid-template-columns: 1fr;
+  }
+
+  .form-input,
+  .filter-select,
+  .admin-filter-input,
+  .admin-filter-select,
+  .admin-inline-row .btn {
+    min-height: 48px;
+  }
+
+  .admin-inline-row,
+  .admin-filter-actions {
+    width: 100%;
+  }
+
+  .admin-inline-row .btn,
+  .admin-filter-actions .btn {
+    flex: 1 1 100%;
   }
 
   .admin-order-top {
@@ -1129,5 +1243,11 @@
 
   .admin-order-total {
     white-space: normal;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -25,7 +25,8 @@ $statusCounts = [
     'to pay' => 0,
     'to ship' => 0,
     'to receive' => 0,
-    'delivered' => 0
+    'to rate' => 0,
+    'rated' => 0
 ];
 
 $countStmt = $conn->prepare("
@@ -34,6 +35,11 @@ $countStmt = $conn->prepare("
     WHERE user_id = ?
     GROUP BY status
 ");
+
+$deliveredGroups = getDeliveredOrdersGroupedByRatingStatus($conn, $userId);
+$statusCounts['to rate'] = count($deliveredGroups['to_rate_ids']);
+$statusCounts['rated'] = count($deliveredGroups['rated_ids']);
+
 $countStmt->bind_param("i", $userId);
 $countStmt->execute();
 $countResult = $countStmt->get_result();
@@ -77,11 +83,52 @@ function getProfileOrdersByStatus($conn, $userId, $status, $limit = 2) {
     return $orders;
 }
 
+function getProfileOrdersByIds(mysqli $conn, array $orderIds, int $limit = 2): array
+{
+    if (empty($orderIds)) {
+        return [];
+    }
+
+    $orderIds = array_slice($orderIds, 0, $limit);
+    $placeholders = implode(',', array_fill(0, count($orderIds), '?'));
+    $types = str_repeat('i', count($orderIds));
+
+    $stmt = $conn->prepare("
+        SELECT id, order_number, total_amount, created_at
+        FROM orders
+        WHERE id IN ($placeholders)
+        ORDER BY created_at DESC, id DESC
+    ");
+    $stmt->bind_param($types, ...$orderIds);
+    $stmt->execute();
+    $ordersResult = $stmt->get_result();
+
+    $orders = [];
+    while ($order = $ordersResult->fetch_assoc()) {
+        $itemStmt = $conn->prepare("
+            SELECT product_name, product_image, quantity
+            FROM order_items
+            WHERE order_id = ?
+            ORDER BY id ASC
+            LIMIT 1
+        ");
+        $itemStmt->bind_param("i", $order['id']);
+        $itemStmt->execute();
+        $item = $itemStmt->get_result()->fetch_assoc();
+
+        $order['preview_item'] = $item ?: null;
+        $orders[] = $order;
+    }
+
+    return $orders;
+}
+
 $previewGroups = [
     'to pay' => getProfileOrdersByStatus($conn, $userId, 'to pay'),
     'to ship' => getProfileOrdersByStatus($conn, $userId, 'to ship'),
     'to receive' => getProfileOrdersByStatus($conn, $userId, 'to receive'),
-    'delivered' => getProfileOrdersByStatus($conn, $userId, 'delivered')
+    'to rate' => getProfileOrdersByIds($conn, $deliveredGroups['to_rate_ids']),
+    'rated' => getProfileOrdersByIds($conn, $deliveredGroups['rated_ids'])
 ];
 
 $initial = strtoupper(substr(trim($user['full_name'] ?? 'U'), 0, 1));
@@ -93,19 +140,14 @@ include __DIR__ . "/includes/header.php";
 
 <section class="profile-section">
     <div class="container">
-        <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success">
-                <?= htmlspecialchars($_SESSION['success_message']) ?>
-            </div>
-            <?php unset($_SESSION['success_message']); ?>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-error">
-                <?= htmlspecialchars($_SESSION['error_message']) ?>
-            </div>
-            <?php unset($_SESSION['error_message']); ?>
-        <?php endif; ?>
+        <?php
+renderFlashMessages([
+    'success_title' => 'Success',
+    'success_heading' => 'Action completed successfully',
+    'error_title' => 'Something went wrong',
+    'error_heading' => 'We couldn’t complete your request'
+]);
+?>
 
         <div class="profile-layout">
             <aside class="profile-card">
@@ -174,8 +216,14 @@ include __DIR__ . "/includes/header.php";
 
                         <div class="tracking-card">
                             <div class="tracking-label">To Rate</div>
-                            <div class="tracking-value"><?= $statusCounts['delivered'] ?></div>
+                            <div class="tracking-value"><?= $statusCounts['to rate'] ?></div>
                             <a href="/lilian-online-store/orders.php?status=to-rate" class="tracking-link">View orders</a>
+                        </div>
+
+                        <div class="tracking-card">
+                            <div class="tracking-label">Rated</div>
+                            <div class="tracking-value"><?= $statusCounts['rated'] ?></div>
+                            <a href="/lilian-online-store/orders.php?status=rated" class="tracking-link">View orders</a>
                         </div>
                     </div>
                 </section>
@@ -194,7 +242,8 @@ include __DIR__ . "/includes/header.php";
                             'to pay' => ['title' => 'To Pay', 'link' => '/lilian-online-store/orders.php?status=to-pay'],
                             'to ship' => ['title' => 'To Ship', 'link' => '/lilian-online-store/orders.php?status=to-ship'],
                             'to receive' => ['title' => 'To Receive', 'link' => '/lilian-online-store/orders.php?status=to-receive'],
-                            'delivered' => ['title' => 'To Rate', 'link' => '/lilian-online-store/orders.php?status=to-rate']
+                            'to rate' => ['title' => 'To Rate', 'link' => '/lilian-online-store/orders.php?status=to-rate'],
+                            'rated' => ['title' => 'Rated', 'link' => '/lilian-online-store/orders.php?status=rated']
                         ];
                         ?>
 
@@ -245,8 +294,8 @@ include __DIR__ . "/includes/header.php";
 
                                     <div class="profile-status-footer">
                                         <a href="<?= htmlspecialchars($config['link']) ?>" class="btn btn-secondary">
-    <?= $statusKey === 'delivered' ? 'Open To Rate Orders' : 'See More' ?>
-</a>
+                                            <?= $statusKey === 'to rate' ? 'Open To Rate Orders' : ($statusKey === 'rated' ? 'Open Rated Orders' : 'See More') ?>
+                                        </a>
                                     </div>
                                 <?php else: ?>
                                     <div class="profile-empty">

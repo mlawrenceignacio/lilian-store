@@ -34,6 +34,9 @@ if ($orderResult->num_rows === 0) {
 
 $order = $orderResult->fetch_assoc();
 
+$ratingProgress = getOrderRatingProgress($conn, $userId, $orderId);
+$isFullyRated = $ratingProgress['is_fully_rated'];
+
 if ($order['status'] !== 'delivered') {
     $_SESSION['error_message'] = "Only delivered orders can be rated.";
     redirect("/lilian-online-store/orders.php");
@@ -75,28 +78,32 @@ include __DIR__ . "/includes/header.php";
 
 <section class="rating-section">
     <div class="container">
-        <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success">
-                <?= htmlspecialchars($_SESSION['success_message']) ?>
-            </div>
-            <?php unset($_SESSION['success_message']); ?>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-error">
-                <?= htmlspecialchars($_SESSION['error_message']) ?>
-            </div>
-            <?php unset($_SESSION['error_message']); ?>
-        <?php endif; ?>
+        <?php
+renderFlashMessages([
+    'success_title' => 'Success',
+    'success_heading' => 'Action completed successfully',
+    'error_title' => 'Something went wrong',
+    'error_heading' => 'We couldn’t complete your request'
+]);
+?>
 
         <div class="rating-layout">
             <section class="rating-card">
                 <div class="rating-card-head">
                     <div>
-                        <h2>Rate Your Order</h2>
-                        <p>Share feedback for products from your delivered order.</p>
+                        <h2><?= $isFullyRated ? 'Rated Products' : 'Rate Your Order' ?></h2>
+                        <p>
+                            <?= $isFullyRated
+                                ? 'Review the products you already rated from this delivered order.'
+                                : 'Share feedback for products from your delivered order.' ?>
+                        </p>
                     </div>
-                    <a href="/lilian-online-store/orders.php?status=to-rate" class="btn btn-secondary">Back to To Rate</a>
+                    <a
+                        href="/lilian-online-store/orders.php?status=<?= $isFullyRated ? 'rated' : 'to-rate' ?>"
+                        class="btn btn-secondary"
+                    >
+                        Back to <?= $isFullyRated ? 'Rated' : 'To Rate' ?>
+                    </a>
                 </div>
 
                 <div class="rating-order-meta">

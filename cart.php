@@ -49,20 +49,20 @@ include __DIR__ . "/includes/header.php";
 
 <section class="cart-section">
     <div class="container">
-        <?php if (isset($_SESSION['success_message'])): ?>
-    <div class="cart-feedback-banner cart-feedback-success">
-        <div class="cart-feedback-icon">✓</div>
-        <div class="cart-feedback-content">
-            <span class="cart-feedback-label">Order Successful</span>
-            <h3>Your order has been placed successfully!</h3>
-            <p><?= htmlspecialchars($_SESSION['success_message']) ?></p>
-            <div class="cart-feedback-actions">
-                <a href="/lilian-online-store/orders.php" class="btn btn-primary">View My Orders</a>
-                <a href="/lilian-online-store/shop.php" class="btn btn-secondary">Shop Again</a>
-            </div>
-        </div>
+        <?php
+renderFlashMessages([
+    'success_title' => 'Order Successful',
+    'success_heading' => 'Your order has been placed successfully!',
+    'error_title' => 'Something went wrong',
+    'error_heading' => 'We couldn’t update your cart'
+]);
+?>
+
+<?php if (isset($_SESSION['just_ordered'])): ?>
+    <div class="cart-feedback-actions" style="margin-bottom: 1.25rem;">
+        <a href="/lilian-online-store/orders.php" class="btn btn-primary">View My Orders</a>
+        <a href="/lilian-online-store/shop.php" class="btn btn-secondary">Shop Again</a>
     </div>
-    <?php unset($_SESSION['success_message']); ?>
 <?php endif; ?>
 
         <?php if (!empty($cartItems)): ?>

@@ -60,19 +60,14 @@ include __DIR__ . "/../includes/header.php";
 
 <section class="admin-section">
     <div class="container">
-        <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success">
-                <?= htmlspecialchars($_SESSION['success_message']) ?>
-            </div>
-            <?php unset($_SESSION['success_message']); ?>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-error">
-                <?= htmlspecialchars($_SESSION['error_message']) ?>
-            </div>
-            <?php unset($_SESSION['error_message']); ?>
-        <?php endif; ?>
+        <?php
+renderFlashMessages([
+    'success_title' => 'Success',
+    'success_heading' => 'Admin action completed successfully',
+    'error_title' => 'Something went wrong',
+    'error_heading' => 'We couldn’t complete the admin request'
+]);
+?>
 
         <div class="admin-layout">
             <aside class="admin-sidebar">
@@ -135,35 +130,38 @@ include __DIR__ . "/../includes/header.php";
                     </div>
 
                     <form action="/lilian-online-store/admin/products.php" method="GET" class="admin-toolbar-grid">
-                        <div>
-                            <label for="search">Search</label>
-                            <input
-                                type="text"
-                                id="search"
-                                name="search"
-                                class="form-input"
-                                placeholder="Search products"
-                                value="<?= htmlspecialchars($search) ?>"
-                            >
-                        </div>
+    <div class="admin-filter-field">
+        <label for="search">Search</label>
+        <input
+            type="text"
+            id="search"
+            name="search"
+            class="form-input"
+            placeholder="Search products"
+            value="<?= htmlspecialchars($search) ?>"
+        >
+    </div>
 
-                        <div>
-                            <label for="category">Category</label>
-                            <select id="category" name="category" class="filter-select">
-                                <option value="all">All Categories</option>
-                                <?php foreach ($categories as $category): ?>
-                                    <option value="<?= htmlspecialchars($category) ?>" <?= $categoryFilter === $category ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($category) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
+    <div>
+        <label for="category">Category</label>
+        <select id="category" name="category" class="filter-select">
+            <option value="all">All Categories</option>
+            <?php foreach ($categories as $category): ?>
+                <option
+                    value="<?= htmlspecialchars($category) ?>"
+                    <?= $categoryFilter === $category ? 'selected' : '' ?>
+                >
+                    <?= htmlspecialchars($category) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
-                        <div class="admin-inline-row" style="align-self:end;">
-                            <button type="submit" class="btn btn-primary">Apply</button>
-                            <a href="/lilian-online-store/admin/products.php" class="btn btn-secondary">Reset</a>
-                        </div>
-                    </form>
+    <div class="admin-inline-row admin-filter-actions">
+        <button type="submit" class="btn btn-primary">Apply</button>
+        <a href="/lilian-online-store/admin/products.php" class="btn btn-secondary">Reset</a>
+    </div>
+</form>
                 </section>
 
                 <section class="admin-add-product-card">

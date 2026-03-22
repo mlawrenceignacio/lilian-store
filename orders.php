@@ -18,6 +18,7 @@ $counts = [
     'to-ship' => 0,
     'to-receive' => 0,
     'to-rate' => 0,
+    'rated' => 0,
     'cancelled' => 0
 ];
 
@@ -33,15 +34,18 @@ $countResult = $countStmt->get_result();
 
 while ($row = $countResult->fetch_assoc()) {
     $status = $row['status'];
-    $total = (int)$row['total'];
+    $total = (int) $row['total'];
     $counts['all'] += $total;
 
     if ($status === 'to pay') $counts['to-pay'] = $total;
     if ($status === 'to ship') $counts['to-ship'] = $total;
     if ($status === 'to receive') $counts['to-receive'] = $total;
-    if ($status === 'delivered') $counts['to-rate'] = $total;
     if ($status === 'cancelled') $counts['cancelled'] = $total;
 }
+
+$deliveredGroups = getDeliveredOrdersGroupedByRatingStatus($conn, $userId);
+$counts['to-rate'] = count($deliveredGroups['to_rate_ids']);
+$counts['rated'] = count($deliveredGroups['rated_ids']);
 
 $sql = "
     SELECT *
@@ -59,12 +63,13 @@ if ($currentFilter === 'to-pay') {
     $sql .= " AND status = 'to receive'";
 } elseif ($currentFilter === 'to-rate') {
     $sql .= " AND status = 'delivered'";
+} elseif ($currentFilter === 'rated') {
+    $sql .= " AND status = 'delivered'";
 } elseif ($currentFilter === 'cancelled') {
     $sql .= " AND status = 'cancelled'";
 }
 
 $sql .= " ORDER BY created_at DESC, id DESC";
-
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
@@ -72,6 +77,14 @@ $orderResult = $stmt->get_result();
 
 $orders = [];
 while ($order = $orderResult->fetch_assoc()) {
+    if ($currentFilter === 'to-rate' && !orderHasUnratedProducts($conn, $userId, (int) $order['id'])) {
+        continue;
+    }
+
+    if ($currentFilter === 'rated' && !isOrderFullyRated($conn, $userId, (int) $order['id'])) {
+        continue;
+    }
+
     $itemStmt = $conn->prepare("
         SELECT product_name, product_price, product_image, quantity, item_total
         FROM order_items
@@ -87,6 +100,7 @@ while ($order = $orderResult->fetch_assoc()) {
         $order['items'][] = $item;
     }
 
+    $order['rating_progress'] = getOrderRatingProgress($conn, $userId, (int) $order['id']);
     $orders[] = $order;
 }
 
@@ -101,12 +115,18 @@ function orderStatusClass($status) {
     };
 }
 
-function orderStatusLabel($status) {
+function orderStatusLabel($status, ?array $ratingProgress = null) {
+    if ($status === 'delivered') {
+        if (!empty($ratingProgress) && !empty($ratingProgress['is_fully_rated'])) {
+            return 'Rated';
+        }
+        return 'To Rate';
+    }
+
     return match ($status) {
         'to pay' => 'To Pay',
         'to ship' => 'To Ship',
         'to receive' => 'To Receive',
-        'delivered' => 'To Rate',
         'cancelled' => 'Cancelled',
         default => ucfirst($status)
     };
@@ -119,29 +139,14 @@ include __DIR__ . "/includes/header.php";
 
 <section class="orders-section">
     <div class="container">
-        <?php if (isset($_SESSION['success_message'])): ?>
-    <div class="admin-feedback-banner admin-feedback-success">
-        <div class="admin-feedback-icon">✓</div>
-        <div class="admin-feedback-content">
-            <span class="admin-feedback-label">Success</span>
-            <h3>Action completed successfully</h3>
-            <p><?= htmlspecialchars($_SESSION['success_message']) ?></p>
-        </div>
-    </div>
-    <?php unset($_SESSION['success_message']); ?>
-<?php endif; ?>
-
-<?php if (isset($_SESSION['error_message'])): ?>
-    <div class="admin-feedback-banner admin-feedback-error">
-        <div class="admin-feedback-icon">!</div>
-        <div class="admin-feedback-content">
-            <span class="admin-feedback-label">Something went wrong</span>
-            <h3>We couldn’t complete your request</h3>
-            <p><?= htmlspecialchars($_SESSION['error_message']) ?></p>
-        </div>
-    </div>
-    <?php unset($_SESSION['error_message']); ?>
-<?php endif; ?>
+        <?php
+        renderFlashMessages([
+            'success_title' => 'Success',
+            'success_heading' => 'Action completed successfully',
+            'error_title' => 'Something went wrong',
+            'error_heading' => 'We couldn’t complete your request'
+        ]);
+        ?>
 
         <div class="section-head">
             <h2>Your Orders</h2>
@@ -179,6 +184,13 @@ include __DIR__ . "/includes/header.php";
                             <span class="filter-count"><?= $counts['to-rate'] ?></span>
                         </a>
 
+                        <a
+                            href="/lilian-online-store/orders.php?status=rated"
+                            class="order-filter-link <?= $currentFilter === 'rated' ? 'active' : '' ?>">
+                            <span>Rated</span>
+                            <span class="filter-count"><?= $counts['rated'] ?></span>
+                        </a>
+
                         <a href="/lilian-online-store/orders.php?status=cancelled" class="order-filter-link <?= $currentFilter === 'cancelled' ? 'active' : '' ?>">
                             <span>Cancelled</span>
                             <span class="filter-count"><?= $counts['cancelled'] ?></span>
@@ -198,6 +210,7 @@ include __DIR__ . "/includes/header.php";
                                 'to-ship' => 'To Ship',
                                 'to-receive' => 'To Receive',
                                 'to-rate' => 'To Rate',
+                                'rated' => 'Rated',
                                 'cancelled' => 'Cancelled',
                                 default => 'All Orders'
                             }) ?>
@@ -222,7 +235,7 @@ include __DIR__ . "/includes/header.php";
                                     </div>
 
                                     <span class="status-badge <?= orderStatusClass($order['status']) ?>">
-                                        <?= orderStatusLabel($order['status']) ?>
+                                        <?= orderStatusLabel($order['status'], $order['rating_progress'] ?? null) ?>
                                     </span>
                                 </div>
 
@@ -308,9 +321,11 @@ include __DIR__ . "/includes/header.php";
                                             <div class="orders-note">Waiting for admin to enable the Order Received button.</div>
                                         <?php endif; ?>
 
-                                        <?php if ($order['status'] === 'delivered'): ?>
-    <a href="/lilian-online-store/rate-order.php?order_id=<?= (int)$order['id'] ?>" class="btn btn-secondary">Rate Products</a>
-<?php endif; ?>
+                                        <?php if ($order['status'] === 'delivered' && !empty($order['rating_progress']['has_unrated_products'])): ?>
+                                            <a href="/lilian-online-store/rate-order.php?order_id=<?= (int)$order['id'] ?>" class="btn btn-secondary">Rate Products</a>
+                                        <?php elseif ($order['status'] === 'delivered' && !empty($order['rating_progress']['is_fully_rated'])): ?>
+                                            <a href="/lilian-online-store/rate-order.php?order_id=<?= (int)$order['id'] ?>" class="btn btn-success-outline">View Rated Products</a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </article>

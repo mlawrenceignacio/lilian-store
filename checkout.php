@@ -97,27 +97,14 @@ include __DIR__ . "/includes/header.php";
 
 <section class="checkout-section">
     <div class="container">
-        <?php if (isset($_SESSION['success_message'])): ?>
-    <div class="alert alert-success alert-banner">
-        <div class="alert-icon">✓</div>
-        <div class="alert-content">
-            <strong>Success</strong>
-            <p><?= htmlspecialchars($_SESSION['success_message']) ?></p>
-        </div>
-    </div>
-    <?php unset($_SESSION['success_message']); ?>
-<?php endif; ?>
-
-<?php if (isset($_SESSION['error_message'])): ?>
-    <div class="alert alert-error alert-banner">
-        <div class="alert-icon">!</div>
-        <div class="alert-content">
-            <strong>Something went wrong</strong>
-            <p><?= htmlspecialchars($_SESSION['error_message']) ?></p>
-        </div>
-    </div>
-    <?php unset($_SESSION['error_message']); ?>
-<?php endif; ?>
+        <?php
+renderFlashMessages([
+    'success_title' => 'Success',
+    'success_heading' => 'Checkout updated',
+    'error_title' => 'Something went wrong',
+    'error_heading' => 'Please review your checkout details'
+]);
+?>
 
         <div class="section-head">
             <h2>Checkout</h2>
@@ -276,8 +263,8 @@ include __DIR__ . "/includes/header.php";
                     <input type="hidden" name="voucher_discount" value="<?= htmlspecialchars(number_format($voucherDiscount, 2, '.', '')) ?>">
                     <input type="hidden" name="voucher_code_applied" value="<?= htmlspecialchars($appliedVoucher['code'] ?? '') ?>">
 
-                    <div class="checkout-group">
-                        <button type="submit" class="btn btn-primary auth-submit">Place Order</button>
+                    <div class="checkout-group checkout-submit-group">
+                        <button type="submit" class="btn btn-primary auth-submit checkout-submit-btn">Place Order</button>
                     </div>
                 </form>
             </div>
